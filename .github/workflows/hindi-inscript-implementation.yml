@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: 22
       - name: Install dependencies
-        run: corepack enable && pnpm install --frozen-lockfile
+        run: corepack enable && pnpm install --no-frozen-lockfile
       - name: Apply Hindi implementation
         run: node scripts/implement-hindi-inscript.mjs
       - name: Validate
