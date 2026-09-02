@@ -16,19 +16,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: pnpm
-      - name: Enable pnpm
-        run: corepack enable
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
       - name: Apply Hindi implementation
         run: node scripts/implement-hindi-inscript.mjs
       - name: Validate changed files
-        run: pnpm exec prettier --check packages/keybr-keyboard/lib/language.ts packages/keybr-keyboard/lib/layout.ts packages/keybr-keyboard/lib/load.ts packages/keybr-keyboard/lib/layout/hi_inscript.ts packages/keybr-content-words/lib/load.ts packages/keybr-content-words/lib/data/words-hi.json packages/keybr-keyboard/lib/language.test.ts
+        run: npx prettier --check packages/keybr-keyboard/lib/language.ts packages/keybr-keyboard/lib/layout.ts packages/keybr-keyboard/lib/load.ts packages/keybr-keyboard/lib/layout/hi_inscript.ts packages/keybr-content-words/lib/load.ts packages/keybr-content-words/lib/data/words-hi.json packages/keybr-keyboard/lib/language.test.ts
       - name: Compile
-        run: pnpm compile
+        run: npm run compile
       - name: Test
-        run: pnpm test
+        run: npm test
       - name: Commit and push
         run: |
           git config user.name 'github-actions[bot]'
