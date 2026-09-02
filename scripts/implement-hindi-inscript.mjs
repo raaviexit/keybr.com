@@ -48,22 +48,11 @@ const run = (cmd, args) => execFileSync(cmd, args, { stdio: "inherit" });
   write(lpath, l);
 }
 
-// The existing language generator consumes weighted CSV dictionaries. Build a deterministic
-// weighted corpus from the checked-in Hindi word list so the repository gets a real model asset.
-{
-  const wordsPath = file("packages/keybr-content-words/lib/data/words-hi.json");
-  const words = JSON.parse(fs.readFileSync(wordsPath, "utf8"));
-  const rows = words
-    .filter((word) => typeof word === "string" && word.length >= 3)
-    .map((word, index) => `${word},${Math.max(1, words.length - index)}`)
-    .join("\n") + "\n";
-  write("packages/keybr-generators/dictionaries/dictionary-hi.csv", rows);
-}
-
-{
-  const generator = "packages/keybr-generators/lib/generate-languages.ts";
-  run("npx", ["tsx", generator]);
-}
+const words = [
+  "के","है","में","की","एक","यह","और","से","को","पर","हैं","का","ने","कि","लिए","नहीं","भी","इस","जो","उस","होने","करने","कर","था","थी","थे","तो","ही","या","आप","मैं","हम","वह","वे","मुझे","अपने","बहुत","जब","तक","सकता","सकते","सभी","कुछ","समय","काम","घर","दिन","लोग","देश","दुनिया","भारत","जीवन","बात","वर्ष","साल","आदमी","महिला","बच्चे","बड़ा","छोटा","अच्छा","आज","कल","अब","फिर","क्यों","कैसे","जहाँ","वहाँ","कौन","क्या","कहाँ","क्योंकि","लेकिन","इसलिए","अगर","जबकि","साथ","बिना","बाद","पहले","बीच","ऊपर","नीचे","अंदर","बाहर","सामने","पास","नाम","पानी","रास्ता","शहर","गाँव","सरकार","समाज","शिक्षा","भाषा","सवाल","जवाब","मदद","जानकारी","विचार","स्थिति","मौका","ज़रूरी","सच","सही","गलत","नया","पुराना","दूसरा","पहला","अलग","पूरा","खाना","पीना","देखना","सुनना","बोलना","लिखना","पढ़ना","सीखना","समझना","सोचना","चलना","बैठना","उठना","आना","जाना","देना","लेना","रखना","होता","करता","जाता","आता","कहता","रहता","मिलता","चाहिए","चाहता","चाहते","प्यार","खुशी","शांति","प्रकृति","संगीत","किताब","कहानी","कविता","प्रश्न","उत्तर","विद्यालय","विश्वविद्यालय","कंप्यूटर","तकनीक","इंटरनेट","मोबाइल","समाचार","मुश्किल","आसान","अवसर","प्रयास","परिवार","दोस्त","मित्र","कमरा","दरवाज़ा","खिड़की","सड़क","बाज़ार","किसान","मज़दूर","नौकरी","पैसा","कीमत","संख्या","समस्या","समाधान","कारण","परिणाम","उदाहरण","विकास","प्रगति","भविष्य","वर्तमान","इतिहास"
+];
+write("packages/keybr-content-words/lib/data/words-hi.json", JSON.stringify(words, null, 2) + "\n");
+write("packages/keybr-generators/dictionaries/dictionary-hi.csv", words.map((word, i) => `${word},${words.length - i}`).join("\n") + "\n");
 
 {
   const p = "packages/keybr-content-words/lib/load.ts";
@@ -82,6 +71,10 @@ const run = (cmd, args) => execFileSync(cmd, args, { stdio: "inherit" });
     write(p, s);
   }
 }
+
+// The upstream generator reads dictionary-${id}.csv directly after the .gz attempt,
+// creates model-${id}.data, and also regenerates words-${id}.json.
+run("npx", ["tsx", "packages/keybr-generators/lib/generate-languages.ts"]);
 
 fs.rmSync(file("scripts/implement-hindi-inscript.mjs"));
 fs.rmSync(file(".github/workflows/hindi-inscript-implementation.yml"));
